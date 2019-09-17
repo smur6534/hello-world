@@ -1,32 +1,86 @@
 ---
-title: "Module 2"
-author: '470336432'
-date: "17/09/2019"
+title: "DATA2002 Module 2 Report"
+author: '470336432, SARAHID, SAYANOID'
+date: "S2 2019"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+# 1. Data Cleaning
+
+### 1.1 Data Import
+
+```{r, echo=FALSE, message=FALSE}
+library(plyr)
+library(dplyr)
+library(tidyverse)
 ```
 
-
-Hey 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r, message=FALSE}
+options(scipen=999) # stops the scientific notation
+x = readr::read_csv("data.csv", na = c("NA",""," ", "n/a"))
 ```
 
-## Including Plots
+### 1.2 Gender Clean
 
-You can also embed plots, for example:
+Re-coding the gender column to make life easier
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+x$Gender <- toupper(mapvalues(x$Gender %>% tolower,
+                              from=c("female", "male", "man"),
+                              to=c("f", "m", "m")))
+x <- x %>% mutate(`Gender` = fct_lump(`Gender`, n = 2, other_level = NA))
+x
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+### 1.3 Shoe Size Clean
+
+Re-coding the shoe sizes (using https://www.finder.com.au/shoe-size-conversion-guide and only converting those clearly EU to what it says the equivalent AUS size is, likely slight discrepancies with the whole UK/US thing but nothing we can do about that)
+
+```{r}
+x <- x %>%
+  mutate(`What is your shoe size?` = 
+           case_when(`Gender` == "M" ~
+                       recode_factor(as.character(`What is your shoe size?`),
+                                     "35.5"="3", "37"="4","38"="5","39"="6","40"="6",
+                                     "40.5"="7","41"="7.5","42"="8","42.5"="8.5","43"="9",
+                                     "44"="9.5","44.5"="10","45"="10.5","46"="11",
+                                     "47"="12","48"="13","49.5"="14"),
+                    `Gender` == "F" ~
+                        recode_factor(as.character(`What is your shoe size?`),
+                                      "35"="4","36"="5","37"="6","38"="7","39"="8",
+                                      "40"="9","41"="10","42"="11")))
+```
+
+Which works! I've split it by gender and refactored accordingly.
+
+```{r}
+x$`What is your shoe size?`
+```
+
+Only problem is, to do this, I had to convert the column into a factor variable rather than as numeric, so to now make the outliers (30, 2000, etc) NA values, I'd need to convert it back into numeric. Should be easy right?
+
+```{r}
+as.numeric(x$`What is your shoe size?`)
+```
+
+Apparently tf not. What the heck. All I do is tell it to be numeric again and this suave mf-er decides "you know what would be cooler? if I just didn't lol". Any thoughts?? This breaks my brain
+
+# 2. Data Exploration
+
+Q1. Is this a random sample of DATA2002 students?
+
+Q2. What are the potential biases in this data generation?
+
+Q3. Which variables are most likely to be subjected to this bias?
+
+# 3. Data Analysis
+
+Q4. Is there any evidence to suggest that there's a difference in the amount of exercise done by people who eat red meat compared to people who don't eat red meat?
+
+Q5. Is there any evidence that the weekly exercise time of students who participate in more than 3 university clubs is different to those who don't?
+
+Q6. Is there evidence that students who live with their parents study more hours per week than students who don't live with their parents?
+
+# 4. Further Data Analysis
+
+Our 3 additional questions.
