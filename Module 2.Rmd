@@ -5,9 +5,7 @@ date: "S2 2019"
 output: html_document
 ---
 
-# 1. Data Cleaning
-
-### 1.1 Data Import
+# 1. Data Import
 
 ```{r, echo=FALSE, message=FALSE}
 library(plyr)
@@ -17,12 +15,78 @@ library(tidyverse)
 
 ```{r, message=FALSE}
 options(scipen=999) # stops the scientific notation
+options(warn=-1) # stops the annoying warnings
 x = readr::read_csv("data.csv", na = c("NA",""," ", "n/a"))
 ```
 
-### 1.2 Gender Clean
+# 2. Data Exploration
 
-Re-coding the gender column to make life easier
+### 2.1 Data Limitations
+
+Q1. Is this a random sample of DATA2002 students?
+No, this is not a random sample of DATA2002 students as not all students have answered the survey. This means that it is only for students had the time and decided to answer the questions. 
+
+Q2. What are the potential biases in this data generation?
+There could be some measurement biases in the data such as the some questions may be interpreted differently to different students. 
+
+Q3. Which variables are most likely to be subjected to this bias?
+For example, the hours or uni work spent last semester, some students may have thought the hours they spent studying outside of uni hours, or some students may have thought of the hours sspent at uni time and outside of uni time. This would have skewed the data as students would ahve answered it differently. 
+
+
+# 3. Data Analysis
+
+### 3.1 Effect of Red Meat Consumption on Exercise
+
+Creating a separate variable "Meat" for whether they consume meat or don't (Y/N), then comparing the counts (possible data limitation, only 7 non-meat eaters)
+
+```{r}
+yes_answers = c("Well done","Rare","Medium","Medium-rare","Medium-well done")
+x$Meat = ifelse(x$`How do you like your steak cooked?` %in% yes_answers, "Yes",
+                ifelse(x$`How do you like your steak cooked?` == "I don't eat red meat", "No", NA))
+x %>% count(Meat)
+```
+
+Cleaning the exercise variable (converted to numeric + changed all values over 24 to "NA")
+Then comparing the averages of those who don't eat meat with those who do. I imagine we might need to do some confidence interval stuff here maybe?
+
+```{r}
+x$`How many hours a week do you spend exercising?` <- as.numeric(as.character(x$`How many hours a week do you spend exercising?`))
+x <- x %>% mutate(`How many hours a week do you spend exercising?` = ifelse(`How many hours a week do you spend exercising?` < 24, `How many hours a week do you spend exercising?`, NA))
+x$`How many hours a week do you spend exercising?`
+x %>% group_by(Meat) %>% summarize(mean_size=mean(`How many hours a week do you spend exercising?`, na.rm=TRUE))
+```
+
+### 3.2 Effect of University Club Participation on Exercise
+
+Creating a separate variable "TripleClub" for whether people are part of 3 or more clubs or not.
+Comparing means of those part of 3 or more groups with those that aren't. Again, confidence intervals or something?
+
+```{r}
+x$TripleClub <- ifelse(x$`How many university clubs are you a member of?` >= 3, "Yes", "No")
+x %>% group_by(TripleClub) %>% summarize(mean_size=mean(`How many hours a week do you spend exercising?`, na.rm=TRUE))
+```
+
+### 3.3 Effect of Living Situation on Study Hours
+
+Cleaning the study variable (removed all values above 70, which is more than 10 hours a day - there was one with 60 but I figured probs shouldn't cut it?)
+Then same deal, comparing the means.
+
+```{r}
+x <- x %>% mutate(`On average, how many hours per week did you spend on university work last semester?` =
+                    ifelse(`On average, how many hours per week did you spend on university work last semester?` < 70,
+                           `On average, how many hours per week did you spend on university work last semester?`, NA))
+x %>% group_by(`Do you currently live with your parents?`) %>% summarize(mean_size=mean(`On average, how many hours per week did you spend on university work last semester?`, na.rm=TRUE))
+```
+
+
+# 4. Further Data Analysis
+
+Our 3 additional questions.
+
+
+### 4.1 Shoe Size vs Height
+
+Re-coding the gender column:
 
 ```{r}
 x$Gender <- toupper(mapvalues(x$Gender %>% tolower,
@@ -31,8 +95,6 @@ x$Gender <- toupper(mapvalues(x$Gender %>% tolower,
 x <- x %>% mutate(`Gender` = fct_lump(`Gender`, n = 2, other_level = NA))
 x
 ```
-
-### 1.3 Shoe Size Clean
 
 Re-coding the shoe sizes (using https://www.finder.com.au/shoe-size-conversion-guide and only converting those clearly EU to what it says the equivalent AUS size is, likely slight discrepancies with the whole UK/US thing but nothing we can do about that)
 
@@ -49,77 +111,54 @@ x <- x %>%
                         recode_factor(as.character(`What is your shoe size?`),
                                       "35"="4","36"="5","37"="6","38"="7","39"="8",
                                       "40"="9","41"="10","42"="11")))
+x$`What is your shoe size?` <- as.numeric(as.character(x$`What is your shoe size?`))  # converting back to numeric
+x <- x %>% mutate(`What is your shoe size?` = ifelse(`What is your shoe size?` < 16, `What is your shoe size?`, NA))  # removing values stupidly high
 ```
 
-Which works! I've split it by gender and refactored accordingly.
+
+
+
+
+
+# BACKUP CODE
 
 ```{r}
-x$`What is your shoe size?`
-```
-
-Only problem is, to do this, I had to convert the column into a factor variable rather than as numeric, so to now make the outliers (30, 2000, etc) NA values, I'd need to convert it back into numeric. Should be easy right?
-
-```{r}
-as.numeric(x$`What is your shoe size?`)
-```
-
-Apparently tf not. What the heck. All I do is tell it to be numeric again and this suave mf-er decides "you know what would be cooler? if I just didn't lol". Any thoughts?? This breaks my brain
-
-# 2. Data Exploration
-
-Q1. Is this a random sample of DATA2002 students?
-No, this is not a random sample of DATA2002 students as not all students have answered the survey. THis means that it is only for students had the time and decided to answer hte questions. 
-
-Q2. What are the potential biases in this data generation?
-There could be some measurement biases in the data such as the some questions may be interpreted differently to different students. 
-
-Q3. Which variables are most likely to be subjected to this bias?
-For example, the hours or uni work spent last semester, some students may have thought the hours they spent studying outside of uni hours, or some students may have thought of the hours sspent at uni time and outside of uni time. This would have skewed the data as students would ahve answered it differently. 
-
-# 3. Data Analysis
-
-Q4. Is there any evidence to suggest that there's a difference in the amount of exercise done by people who eat red meat compared to people who don't eat red meat?
-```{r}
-sample$how_do_you_like_your_steak_cooked[sample$how_do_you_like_your_steak_cooked=="Well done"] = "eat red meat"
-sample$how_do_you_like_your_steak_cooked[sample$how_do_you_like_your_steak_cooked=="Rare"] = "eat red meat"
-sample$how_do_you_like_your_steak_cooked[sample$how_do_you_like_your_steak_cooked=="Medium"] = "eat red meat"
-sample$how_do_you_like_your_steak_cooked[sample$how_do_you_like_your_steak_cooked=="Medium-rare"] = "eat red meat"
-sample$how_do_you_like_your_steak_cooked[sample$how_do_you_like_your_steak_cooked=="Medium-well done"] = "eat red meat"
-red_meat = sample %>% dplyr::count(`how_do_you_like_your_steak_cooked`,)
+## Sayano's Original Work for Q4 ##
+x$`How do you like your steak cooked?`[x$`How do you like your steak cooked?`=="Well done"] = "eat red meat"
+x$`How do you like your steak cooked?`[x$`How do you like your steak cooked?`=="Rare"] = "eat red meat"
+x$`How do you like your steak cooked?`[x$`How do you like your steak cooked?`=="Medium"] = "eat red meat"
+x$`How do you like your steak cooked?`[x$`How do you like your steak cooked?`=="Medium-rare"] = "eat red meat"
+x$`How do you like your steak cooked?`[x$`How do you like your steak cooked?`=="Medium-well done"] = "eat red meat"
+red_meat = x %>% dplyr::count(`How do you like your steak cooked?`,)
 eat_red_meat=c(21,18,11,14,2,7,27)
 no_red_meat=c(0,3,1,0,0,1,2)
-(meat <- with(sample, table(how_do_you_like_your_steak_cooked, how_many_hours_a_week_do_you_spend_exercising)))
+(meat <- with(x, table(`How do you like your steak cooked?`, `How many hours a week do you spend exercising?`)))
 c(mean(no_red_meat), mean(eat_red_meat))
 ```
 
-Q5. Is there any evidence that the weekly exercise time of students who participate in more than 3 university clubs is different to those who don't?
 ```{r}
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="0"] = "0-1"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="0.5"] = "0-1"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="1"] = "1-2"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="2"] = "1-2"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="2.5"] = "2-3"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="2.75"] = "2-3"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="3"] = "2-3"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="3.5"] = "3-4"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="3.75"] = "3-4"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="4"] = "4-5"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="5"] = "5-9"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="6"] = "5-9"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="7"] = "5-9"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="8"] = "5-9"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="10"] = "10+"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="12"] = "10+"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="14"] = "10+"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="20"] = "10+"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="420"] = "NA"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="09999900"] = "NA"
-sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="9223372036854775808"] = "NA"
-(gender_hand <- with(sample, table(how_many_hours_a_week_do_you_spend_exercising, how_many_university_clubs_are_you_a_member_of)))
+## Sayano's Original Work for Q5 ##
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="0"] = "0-1"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="0.5"] = "0-1"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="1"] = "1-2"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="2"] = "1-2"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="2.5"] = "2-3"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="2.75"] = "2-3"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="3"] = "2-3"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="3.5"] = "3-4"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="3.75"] = "3-4"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="4"] = "4-5"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="5"] = "5-9"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="6"] = "5-9"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="7"] = "5-9"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="8"] = "5-9"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="10"] = "10+"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="12"] = "10+"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="14"] = "10+"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="20"] = "10+"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="420"] = "NA"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="09999900"] = "NA"
+x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="9223372036854775808"] = "NA"
+(gender_hand <- with(x, table(`How many hours a week do you spend exercising?`, `How many university clubs are you a member of?`)))
 ```
 
-Q6. Is there evidence that students who live with their parents study more hours per week than students who don't live with their parents?
-
-# 4. Further Data Analysis
-
-Our 3 additional questions.
