@@ -68,16 +68,55 @@ Apparently tf not. What the heck. All I do is tell it to be numeric again and th
 # 2. Data Exploration
 
 Q1. Is this a random sample of DATA2002 students?
+No, this is not a random sample of DATA2002 students as not all students have answered the survey. THis means that it is only for students had the time and decided to answer hte questions. 
 
 Q2. What are the potential biases in this data generation?
+There could be some measurement biases in the data such as the some questions may be interpreted differently to different students. 
 
 Q3. Which variables are most likely to be subjected to this bias?
+For example, the hours or uni work spent last semester, some students may have thought the hours they spent studying outside of uni hours, or some students may have thought of the hours sspent at uni time and outside of uni time. This would have skewed the data as students would ahve answered it differently. 
 
 # 3. Data Analysis
 
 Q4. Is there any evidence to suggest that there's a difference in the amount of exercise done by people who eat red meat compared to people who don't eat red meat?
+```{r}
+sample$how_do_you_like_your_steak_cooked[sample$how_do_you_like_your_steak_cooked=="Well done"] = "eat red meat"
+sample$how_do_you_like_your_steak_cooked[sample$how_do_you_like_your_steak_cooked=="Rare"] = "eat red meat"
+sample$how_do_you_like_your_steak_cooked[sample$how_do_you_like_your_steak_cooked=="Medium"] = "eat red meat"
+sample$how_do_you_like_your_steak_cooked[sample$how_do_you_like_your_steak_cooked=="Medium-rare"] = "eat red meat"
+sample$how_do_you_like_your_steak_cooked[sample$how_do_you_like_your_steak_cooked=="Medium-well done"] = "eat red meat"
+red_meat = sample %>% dplyr::count(`how_do_you_like_your_steak_cooked`,)
+eat_red_meat=c(21,18,11,14,2,7,27)
+no_red_meat=c(0,3,1,0,0,1,2)
+(meat <- with(sample, table(how_do_you_like_your_steak_cooked, how_many_hours_a_week_do_you_spend_exercising)))
+c(mean(no_red_meat), mean(eat_red_meat))
+```
 
 Q5. Is there any evidence that the weekly exercise time of students who participate in more than 3 university clubs is different to those who don't?
+```{r}
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="0"] = "0-1"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="0.5"] = "0-1"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="1"] = "1-2"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="2"] = "1-2"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="2.5"] = "2-3"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="2.75"] = "2-3"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="3"] = "2-3"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="3.5"] = "3-4"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="3.75"] = "3-4"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="4"] = "4-5"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="5"] = "5-9"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="6"] = "5-9"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="7"] = "5-9"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="8"] = "5-9"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="10"] = "10+"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="12"] = "10+"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="14"] = "10+"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="20"] = "10+"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="420"] = "NA"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="09999900"] = "NA"
+sample$how_many_hours_a_week_do_you_spend_exercising[sample$how_many_hours_a_week_do_you_spend_exercising=="9223372036854775808"] = "NA"
+(gender_hand <- with(sample, table(how_many_hours_a_week_do_you_spend_exercising, how_many_university_clubs_are_you_a_member_of)))
+```
 
 Q6. Is there evidence that students who live with their parents study more hours per week than students who don't live with their parents?
 
