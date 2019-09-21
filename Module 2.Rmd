@@ -1,11 +1,11 @@
 ---
-title: "DATA2002 Module 2 Report"
-author: '470336432, SARAHID, SAYANOID'
-date: "S2 2019"
+title: "Module 2 Report - DATA2002 Student Survey"
+author: '470336432, 470402449, SAYANOID'
+date: "Semester 2 2019"
 output: html_document
 ---
 
-# 1. Data Import
+#                             Data Import
 
 ```{r, echo=FALSE, message=FALSE}
 library(plyr)
@@ -19,23 +19,28 @@ options(warn=-1) # stops the annoying warnings
 x = readr::read_csv("data.csv", na = c("NA",""," ", "n/a"))
 ```
 
-# 2. Data Exploration
+# Data Exploration
 
-### 2.1 Data Limitations
-
-Q1. Is this a random sample of DATA2002 students?
-No, this is not a random sample of DATA2002 students as not all students have answered the survey. This means that it is only for students had the time and decided to answer the questions. 
-
-Q2. What are the potential biases in this data generation?
-There could be some measurement biases in the data such as the some questions may be interpreted differently to different students. 
-
-Q3. Which variables are most likely to be subjected to this bias?
-For example, the hours or uni work spent last semester, some students may have thought the hours they spent studying outside of uni hours, or some students may have thought of the hours sspent at uni time and outside of uni time. This would have skewed the data as students would ahve answered it differently. 
+The dataset used comes from a class survey of the students in DATA2002. There were 110 respondents who each answered 22 questions about themselves. A timestamp variable of when respondents completed the survey is also included.
 
 
-# 3. Data Analysis
+####  Data Limitations
 
-### 3.1 Effect of Red Meat Consumption on Exercise
+##### Q1. Is this a random sample of DATA2002 students?
+No, the data is not a random sample of students from DATA2002 because, whilst only a sample or subset of students completed the survey, means that only a 'type of student' is reflected in the sample, possibly high achieving or highly motivated students who had the time and made the active decision to complete the survey. As such, students who generally participate less in their courses are not reflected in the sample data and therefore the data is not a random sample. 
+
+
+##### Q2. What are the potential biases in this data generation?
+There could be some measurement biases in the data such as the same questions may be interpreted differently in the students responses. Furthermore, knowing that this survey was going to be used for an assessment, that there is some level of response bias, with students answering in a specific way or the way they think the researcher would like them to answer instead of their true response. 
+
+
+##### Q3. Which variables are most likely to be subjected to this bias?
+The more open ended questions are more likely to be subjected to bias. For example, the questions asking students the hours they spend on university work last semester could easily be subject to measurement bias with students differently interpreting what constitutes university work, as well as be subject to response bias with students over or under exaggerating the hours they work to appeal to the lecturer.
+
+
+Data Analysis
+
+### Q4. Is there any evidence to suggest that there’s a difference in the amount of exercise done by people who eat red meat compared to people who don’t eat red meat?
 
 Creating a separate variable "Meat" for whether they consume meat or don't (Y/N), then comparing the counts (possible data limitation, only 7 non-meat eaters)
 
@@ -52,7 +57,7 @@ Then comparing the averages of those who don't eat meat with those who do. I ima
 ```{r}
 x$`How many hours a week do you spend exercising?` <- as.numeric(as.character(x$`How many hours a week do you spend exercising?`))
 x <- x %>% mutate(`How many hours a week do you spend exercising?` = ifelse(`How many hours a week do you spend exercising?` < 24, `How many hours a week do you spend exercising?`, NA))
-x$`How many hours a week do you spend exercising?`
+
 x %>% group_by(Meat) %>% summarize(mean_size=mean(`How many hours a week do you spend exercising?`, na.rm=TRUE))
 ```
 
@@ -64,6 +69,7 @@ Comparing means of those part of 3 or more groups with those that aren't. Again,
 ```{r}
 x$TripleClub <- ifelse(x$`How many university clubs are you a member of?` >= 3, "Yes", "No")
 x %>% group_by(TripleClub) %>% summarize(mean_size=mean(`How many hours a week do you spend exercising?`, na.rm=TRUE))
+
 ```
 
 ### 3.3 Effect of Living Situation on Study Hours
