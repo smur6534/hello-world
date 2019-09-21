@@ -193,9 +193,9 @@ x = readr::read_csv(&quot;data.csv&quot;, na = c(&quot;NA&quot;,&quot;&quot;,&qu
 </div>
 <div id="data-exploration" class="section level1">
 <h1>Data Exploration</h1>
-<p>The dataset used comes from a class survey of the students in DATA2002. There were 110 respondents who each answered 22 questions about themselves. A timestamp variable of when they completed the survey is also included.</p>
-<div id="data-limitations" class="section level3">
-<h3>Data Limitations</h3>
+<p>The dataset used comes from a class survey of the students in DATA2002. There were 110 respondents who each answered 22 questions about themselves. A timestamp variable of when respondents completed the survey is also included.</p>
+<div id="data-limitations" class="section level4">
+<h4>Data Limitations</h4>
 <div id="q1.-is-this-a-random-sample-of-data2002-students" class="section level5">
 <h5>Q1. Is this a random sample of DATA2002 students?</h5>
 <p>No, the data is not a random sample of students from DATA2002 because, whilst only a sample or subset of students completed the survey, means that only a ‘type of student’ is reflected in the sample, possibly high achieving or highly motivated students who had the time and made the active decision to complete the survey. As such, students who generally participate less in their courses are not reflected in the sample data and therefore the data is not a random sample.</p>
@@ -207,48 +207,55 @@ x = readr::read_csv(&quot;data.csv&quot;, na = c(&quot;NA&quot;,&quot;&quot;,&qu
 <div id="q3.-which-variables-are-most-likely-to-be-subjected-to-this-bias" class="section level5">
 <h5>Q3. Which variables are most likely to be subjected to this bias?</h5>
 <p>The more open ended questions are more likely to be subjected to bias. For example, the questions asking students the hours they spend on university work last semester could easily be subject to measurement bias with students differently interpreting what constitutes university work, as well as be subject to response bias with students over or under exaggerating the hours they work to appeal to the lecturer.</p>
+<p>Data Analysis</p>
 </div>
 </div>
-</div>
-<div id="data-analysis" class="section level1">
-<h1>3. Data Analysis</h1>
-<div id="effect-of-red-meat-consumption-on-exercise" class="section level3">
-<h3>3.1 Effect of Red Meat Consumption on Exercise</h3>
-<p>Creating a separate variable “Meat” for whether they consume meat or don’t (Y/N), then comparing the counts (possible data limitation, only 7 non-meat eaters)</p>
+<div id="q4.-is-there-any-evidence-to-suggest-that-theres-a-difference-in-the-amount-of-exercise-done-by-people-who-eat-red-meat-compared-to-people-who-dont-eat-red-meat" class="section level3">
+<h3>Q4. Is there any evidence to suggest that there’s a difference in the amount of exercise done by people who eat red meat compared to people who don’t eat red meat?</h3>
+<p>Cleaning data: Creating a separate varaible ‘Meat’ based off whether respondents eat meat to then compare the counts. Then cleaning the excercise variable by removing all values greater than 24 and converting the type of data to numeric.</p>
 <pre class="r"><code>yes_answers = c(&quot;Well done&quot;,&quot;Rare&quot;,&quot;Medium&quot;,&quot;Medium-rare&quot;,&quot;Medium-well done&quot;)
 x$Meat = ifelse(x$`How do you like your steak cooked?` %in% yes_answers, &quot;Yes&quot;,
                 ifelse(x$`How do you like your steak cooked?` == &quot;I don't eat red meat&quot;, &quot;No&quot;, NA))
-x %&gt;% count(Meat)</code></pre>
-<pre><code>## # A tibble: 3 x 2
-##   Meat      n
-##   &lt;chr&gt; &lt;int&gt;
-## 1 No        7
-## 2 Yes     101
-## 3 &lt;NA&gt;      2</code></pre>
-<p>Cleaning the exercise variable (converted to numeric + changed all values over 24 to “NA”) Then comparing the averages of those who don’t eat meat with those who do. I imagine we might need to do some confidence interval stuff here maybe?</p>
-<pre class="r"><code>x$`How many hours a week do you spend exercising?` &lt;- as.numeric(as.character(x$`How many hours a week do you spend exercising?`))
-x &lt;- x %&gt;% mutate(`How many hours a week do you spend exercising?` = ifelse(`How many hours a week do you spend exercising?` &lt; 24, `How many hours a week do you spend exercising?`, NA))
-x$`How many hours a week do you spend exercising?`</code></pre>
-<pre><code>##   [1]  5.00  0.00  3.00 10.00 12.00  6.00  8.00  4.00  2.00  1.00  8.00
-##  [12] 20.00  5.00  0.00  5.00  6.00  1.00  2.00 10.00  4.00  2.50  3.75
-##  [23]  4.00  5.00 12.00  1.00  2.00  5.00  0.00  0.00  3.00  3.00  3.00
-##  [34]  4.00  3.00  5.00  2.00 10.00  2.00  2.00  3.00  7.00    NA  5.00
-##  [45]  0.00  1.00 10.00  3.00  3.00  0.50 10.00  0.00  1.00  7.00  0.00
-##  [56]  0.00  1.00  3.00  5.00  4.00  2.00  5.00  8.00  5.00  7.00  7.00
-##  [67]  5.00  7.00  5.00  0.00  1.00  3.00  0.00  3.50  4.00  0.00  2.00
-##  [78]  0.00    NA  0.00 10.00  4.00  2.00    NA  5.00  3.00  2.00  7.00
-##  [89]  1.00  6.00  0.00  3.00  5.00  2.00  3.00 10.00  0.00  4.00  0.00
-## [100]  0.00  7.00  2.00  0.00  6.00 20.00  0.00  1.00 14.00  7.00  0.00</code></pre>
-<pre class="r"><code>x %&gt;% group_by(Meat) %&gt;% summarize(mean_size=mean(`How many hours a week do you spend exercising?`, na.rm=TRUE))</code></pre>
-<pre><code>## # A tibble: 3 x 2
-##   Meat  mean_size
-##   &lt;chr&gt;     &lt;dbl&gt;
-## 1 No         5   
-## 2 Yes        4.01
-## 3 &lt;NA&gt;     NaN</code></pre>
+x$`How many hours a week do you spend exercising?` &lt;- as.numeric(as.character(x$`How many hours a week do you spend exercising?`))
+x &lt;- x %&gt;% mutate(`How many hours a week do you spend exercising?` = ifelse(`How many hours a week do you spend exercising?` &lt; 24, `How many hours a week do you spend exercising?`, NA))</code></pre>
+<div id="performing-a-2-sample-t-test." class="section level4">
+<h4>Performing a 2 sample T test.</h4>
+<p>This will demonstrate whether the 2 samples: meat eaters and non meaters, if their level of exercise is independent or dependent.</p>
+<p><strong>1. Hypothesis:</strong> <span class="math display">\[H0: μ_x = μ_y H1: μ_x \text{  does not equal  } μ_y\]</span></p>
+<p><strong>2. Assumptions:</strong> <span class="math display">\[X_i,..... X_n \text{  are independent and identically distributed, }\]</span> <span class="math display">\[Y_i,..... Y_n \text{  are independent and identically distributed.}\]</span> <span class="math display">\[X_i's \text{  independent of } Y_i's\]</span></p>
+<pre class="r"><code>x %&gt;% group_by(Meat) %&gt;% summarize(Mean=mean(`How many hours a week do you spend exercising?`, na.rm=TRUE),SD=sd(`How many hours a week do you spend exercising?`, na.rm=TRUE), n=n())</code></pre>
+<pre><code>## # A tibble: 3 x 4
+##   Meat    Mean     SD     n
+##   &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;int&gt;
+## 1 No      5      4.69     7
+## 2 Yes     4.01   3.87   101
+## 3 &lt;NA&gt;  NaN    NaN        2</code></pre>
+<p><strong>3. Test Statistic:</strong> <span class="math display">\[T = \frac{X-Y}{(S_p  \sqrt(1/n_1+1/n_2))}\]</span> where <span class="math display">\[S^2_p= \frac{(n_x-1)S^2_x + (n_y-1)S^2_y}{n_x+n_y-2}   \]</span> Under <span class="math display">\[ H_0, T ~ t_n_x+T_n_y\]</span></p>
+<pre class="r"><code>nM=101
+nV=7
+sM=3.866192 
+sV=4.690416 
+mM=4.0125   
+mV=5.0000   
+sP = sqrt(((nM - 1) * sM^2 + (nV - 1) * sV^2)/
+(nM + nV - 2))
+
+
+
+t0 = (mM - mV)/(sP * sqrt(1/nM + 1/nV))
+t0</code></pre>
+<pre><code>## [1] -0.6449533</code></pre>
+<p><strong>4. Observed Test Statistic:</strong> <span class="math display">\[t_0 = -0.645\]</span></p>
+<pre class="r"><code>deg_free = nM+nV-2
+p_val = 2 * (1 - pt(abs(t0), deg_free))
+p_val</code></pre>
+<pre><code>## [1] 0.5203509</code></pre>
+<p><strong>5. P Value:</strong> <span class="math display">\[P(X^2_1 \geq -0.645) = 0.5203\]</span></p>
+<p><strong>6. Decision:</strong> Since the P Value is greater than 0.05, we <strong>retain the Null Hypothesis</strong> and therefore there is no evidence that eating meat impacts the hours students excercise for.</p>
 </div>
-<div id="effect-of-university-club-participation-on-exercise" class="section level3">
-<h3>3.2 Effect of University Club Participation on Exercise</h3>
+</div>
+<div id="q5-is-there-any-evidence-that-the-weekly-exercise-time-of-students-who-participate-in-more-than-3-univeristy-clubs-is-different-to-those-who-dont" class="section level3">
+<h3>Q5 Is there any evidence that the weekly exercise time of students who participate in more than 3 univeristy clubs is different to those who don’t?</h3>
 <p>Creating a separate variable “TripleClub” for whether people are part of 3 or more clubs or not. Comparing means of those part of 3 or more groups with those that aren’t. Again, confidence intervals or something?</p>
 <pre class="r"><code>x$TripleClub &lt;- ifelse(x$`How many university clubs are you a member of?` &gt;= 3, &quot;Yes&quot;, &quot;No&quot;)
 x %&gt;% group_by(TripleClub) %&gt;% summarize(mean_size=mean(`How many hours a week do you spend exercising?`, na.rm=TRUE))</code></pre>
@@ -258,8 +265,8 @@ x %&gt;% group_by(TripleClub) %&gt;% summarize(mean_size=mean(`How many hours a 
 ## 1 No              4.22
 ## 2 Yes             3.68</code></pre>
 </div>
-<div id="effect-of-living-situation-on-study-hours" class="section level3">
-<h3>3.3 Effect of Living Situation on Study Hours</h3>
+<div id="q6-is-there-evidence-that-students-who-live-with-their-parents-study-more-hours-per-week-than-students-who-dont-live-with-their-parents" class="section level3">
+<h3>Q6 Is there evidence that students who live with their parents study more hours per week than students who don’t live with their parents?</h3>
 <p>Cleaning the study variable (removed all values above 70, which is more than 10 hours a day - there was one with 60 but I figured probs shouldn’t cut it?) Then same deal, comparing the means.</p>
 <pre class="r"><code>x &lt;- x %&gt;% mutate(`On average, how many hours per week did you spend on university work last semester?` =
                     ifelse(`On average, how many hours per week did you spend on university work last semester?` &lt; 70,
@@ -277,7 +284,7 @@ x %&gt;% group_by(`Do you currently live with your parents?`) %&gt;% summarize(m
 <h1>4. Further Data Analysis</h1>
 <p>Our 3 additional questions.</p>
 <div id="shoe-size-vs-height" class="section level3">
-<h3>4.1 Shoe Size vs Height</h3>
+<h3>Shoe Size vs Height</h3>
 <p>Re-coding the gender column:</p>
 <pre class="r"><code>x$Gender &lt;- toupper(mapvalues(x$Gender %&gt;% tolower,
                               from=c(&quot;female&quot;, &quot;male&quot;, &quot;man&quot;),
@@ -326,6 +333,68 @@ x</code></pre>
                                       &quot;40&quot;=&quot;9&quot;,&quot;41&quot;=&quot;10&quot;,&quot;42&quot;=&quot;11&quot;)))
 x$`What is your shoe size?` &lt;- as.numeric(as.character(x$`What is your shoe size?`))  # converting back to numeric
 x &lt;- x %&gt;% mutate(`What is your shoe size?` = ifelse(`What is your shoe size?` &lt; 16, `What is your shoe size?`, NA))  # removing values stupidly high</code></pre>
+</div>
+<div id="do-more-right-handed-people-wear-glasses" class="section level3">
+<h3>Do more right handed people wear glasses?</h3>
+<div id="performing-fishers-exact-test" class="section level4">
+<h4>Performing Fisher’s Exact Test</h4>
+<p>This will demonstrate whether ‘handedness’ and needing glasses are independent or not.</p>
+<p><strong>1. Hypothesis:</strong> <span class="math display">\[H_0: θ = 1 \]</span> <span class="math display">\[H_1 θ &gt; 1\]</span></p>
+<p><strong>2. Assumptions:</strong> As this is an ‘exact’ test we do not have to assume that the categories have to be greater than 5</p>
+<pre class="r"><code>handed=recode(x$`What is your dominant hand?`, `Left handed` =&quot;Left&quot;, `Right handed`=&quot;Right&quot;,.default = NA_character_)
+
+
+tab=table(handed,x$`Do you wear glasses or contacts?`)
+tab</code></pre>
+<pre><code>##        
+## handed  No Yes
+##   Left   5   4
+##   Right 40  57</code></pre>
+<p><strong>3. Test Statistic:</strong> ??</p>
+<pre class="r"><code>fisher.test(tab)</code></pre>
+<pre><code>## 
+##  Fisher's Exact Test for Count Data
+## 
+## data:  tab
+## p-value = 0.4901
+## alternative hypothesis: true odds ratio is not equal to 1
+## 95 percent confidence interval:
+##  0.3567146 9.5107571
+## sample estimates:
+## odds ratio 
+##   1.771318</code></pre>
+<p><strong>4. Observed Test Statistic:</strong> ??</p>
+<p><strong>5. P Value:</strong> 0.4901</p>
+<p><strong>6. Decision:</strong> Since the P Value is greater than 0.05, we <strong>retain the Null Hypothesis</strong> and therefore the sample data supports the claim that handedness and needing glasses is independent</p>
+</div>
+</div>
+<div id="is-there-a-difference-between-students-who-live-at-home-and-whether-they-had-a-pet-growing-up" class="section level3">
+<h3>Is there a difference between students who live at home and whether they had a pet growing up</h3>
+<p><strong>1. Hypothesis:</strong> H0: <span class="math display">\[p_ij =P_i\times P_j for i = 1,2 and j =1,2\]</span> H1: At least one equality does not hold.</p>
+<p><strong>2. Assumptions:</strong> <span class="math display">\[e_ij = y_i\times y_j/n ≥ 5\]</span></p>
+<pre class="r"><code>table(x$`Do you currently live with your parents?`,x$`Did you have a pet growing up?`)</code></pre>
+<pre><code>##      
+##       No Yes
+##   No  35  25
+##   Yes 13  36</code></pre>
+<p><strong>3. Test Statistic:</strong> <span class="math display">\[T = \sum_{i=1}^{2}\sum_{j=1}^{2} \frac{(y_i\times y_j/n)^2}{y_i\times y_j/n}. Under H_0   T ∼ χ_1^2\]</span></p>
+<div id="chi-squared-test-of-independence" class="section level4">
+<h4>Chi Squared Test of Independence</h4>
+<pre class="r"><code>y=c(35,13,25,36)
+n=sum(y)
+c=2
+r=2
+y.mat = matrix(y, nrow = r, ncol = c)
+chisq.test(y.mat)</code></pre>
+<pre><code>## 
+##  Pearson's Chi-squared test with Yates' continuity correction
+## 
+## data:  y.mat
+## X-squared = 9.8167, df = 1, p-value = 0.001729</code></pre>
+<p><strong>4. Observed Test Statistic:</strong> <span class="math display">\[t_0 = 9.87167\]</span></p>
+<p><strong>5. P Value:</strong> <span class="math display">\[P(X^2_1 \geq 9.87167) = 0.001729\]</span></p>
+<p><strong>6. Decision:</strong> Since the P Value is less than 0.05, we <strong>reject the Null Hypothesis</strong> and can state that having a pet whilst growing up means you are more likey to be living at home.</p>
+</div>
 </div>
 </div>
 <div id="backup-code" class="section level1">
