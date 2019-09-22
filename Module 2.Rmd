@@ -111,9 +111,54 @@ Comparing means of those part of 3 or more groups with those that aren't. Again,
 
 ```{r}
 x$TripleClub <- ifelse(x$`How many university clubs are you a member of?` >= 3, "Yes", "No")
-x %>% group_by(TripleClub) %>% summarize(mean_size=mean(`How many hours a week do you spend exercising?`, na.rm=TRUE))
+#x %>% group_by(TripleClub) %>% summarize(mean_size=mean(`How many hours a week do you spend exercising?`, na.rm=TRUE))
 
+x %>% group_by(TripleClub) %>% summarize(Mean = mean(`How many hours a week do you spend exercising?`, na.rm=TRUE), SD = sd(`How many hours a week do you spend exercising?`, na.rm=TRUE), n=n())
+
+library("ggplot2")
+ggplot(x, aes(x=TripleClub, y = `How many hours a week do you spend exercising?`)) + geom_boxplot() + geom_jitter(width=0.15, size=3, colour = "blue") + theme_bw(base_size=32) + labs(x="eat red meat?", y="hours of sports played")
 ```
+
+####Performing a 2 sample T test. 
+This will demonstrate whether the 2 samples: meat eaters and non meaters, if their level of exercise is independent or dependent. 
+
+**1. Hypothesis:** $$H0: μ_x = μ_y H1: μ_x \text{  does not equal  } μ_y$$
+
+**2. Assumptions:** $$X_i,..... X_n \text{  are independent and identically distributed, }$$
+$$Y_i,..... Y_n \text{  are independent and identically distributed.}$$
+$$X_i's \text{  independent of } Y_i's$$
+```{r}
+x %>% group_by(TripleClub) %>% summarize(Mean=mean(`How many hours a week do you spend exercising?`, na.rm=TRUE),SD=sd(`How many hours a week do you spend exercising?`, na.rm=TRUE), n=n())
+```
+
+**3. Test Statistic:** $$T = \frac{X-Y}{(S_p  \sqrt(1/n_1+1/n_2))}$$ where 
+$$S^2_p= \frac{(n_x-1)S^2_x + (n_y-1)S^2_y}{n_x+n_y-2}   $$ Under $$ H_0, T ~ t_n_x+T_n_y$$
+
+```{r}
+nY=29
+nN=81
+sY=3.333929
+sN=4.101354
+mY=3.678571	
+mN=4.218354
+sP = sqrt(((nY - 1) * sY^2 + (nN - 1) * sN^2)/
+(nY + nN - 2))
+
+t0 = (mY - mN)/(sP * sqrt(1/nY + 1/nN))
+t0
+```
+
+**4. Observed Test Statistic:** $$t_0 = -0.637$$
+```{r}
+deg_free = nY+nN-2
+p_val = 2 * (1 - pt(abs(t0), deg_free))
+p_val
+```
+
+**5. P Value:** $$P(X^2_1 \geq -0.645) = 0.5256$$
+
+**6. Decision:**
+Since the P Value is greater than 0.05, we **retain the Null Hypothesis** and therefore there is no evidence that being apart of a students club impacts the hours students excercise for.
 
 ### Q6 Is there evidence that students who live with their parents study more hours per week than students who don’t live with their parents?
 
