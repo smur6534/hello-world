@@ -1,6 +1,6 @@
 ---
 title: "Module 2 Report - DATA2002 Student Survey"
-author: '470336432, 470402449, SAYANOID'
+author: '470336432, 470402449, 470378568'
 date: "Semester 2 2019"
 output: html_document
 ---
@@ -44,13 +44,18 @@ Data Analysis
 
 Cleaning data: Creating a separate varaible 'Meat' based off whether respondents eat meat to then compare the counts. Then cleaning the excercise variable by removing all values greater than 24 and converting the type of data to numeric.
 
-
 ```{r}
 yes_answers = c("Well done","Rare","Medium","Medium-rare","Medium-well done")
 x$Meat = ifelse(x$`How do you like your steak cooked?` %in% yes_answers, "Yes",
                 ifelse(x$`How do you like your steak cooked?` == "I don't eat red meat", "No", NA))
 x$`How many hours a week do you spend exercising?` <- as.numeric(as.character(x$`How many hours a week do you spend exercising?`))
 x <- x %>% mutate(`How many hours a week do you spend exercising?` = ifelse(`How many hours a week do you spend exercising?` < 24, `How many hours a week do you spend exercising?`, NA))
+
+#x %>% group_by(Meat) %>% summarize(mean_size=mean(`How many hours a week do you spend exercising?`, na.rm=TRUE))
+x %>% group_by(Meat) %>% summarize(Mean = mean(`How many hours a week do you spend exercising?`, na.rm=TRUE), SD = sd(`How many hours a week do you spend exercising?`, na.rm=TRUE), n=n())
+
+library("ggplot2")
+ggplot(x, aes(x=Meat, y = `How many hours a week do you spend exercising?`)) + geom_boxplot() + geom_jitter(width=0.15, size=3, colour = "blue") + theme_bw(base_size=32) + labs(x="eat red meat?", y="number of hours of sports played")
 ```
 
 
@@ -63,10 +68,7 @@ This will demonstrate whether the 2 samples: meat eaters and non meaters, if the
 $$Y_i,..... Y_n \text{  are independent and identically distributed.}$$
 $$X_i's \text{  independent of } Y_i's$$
 ```{r}
-
 x %>% group_by(Meat) %>% summarize(Mean=mean(`How many hours a week do you spend exercising?`, na.rm=TRUE),SD=sd(`How many hours a week do you spend exercising?`, na.rm=TRUE), n=n())
-
-
 ```
 
 **3. Test Statistic:** $$T = \frac{X-Y}{(S_p  \sqrt(1/n_1+1/n_2))}$$ where 
@@ -82,12 +84,9 @@ mV=5.0000
 sP = sqrt(((nM - 1) * sM^2 + (nV - 1) * sV^2)/
 (nM + nV - 2))
 
-
-
 t0 = (mM - mV)/(sP * sqrt(1/nM + 1/nV))
 t0
 ```
-
 
 **4. Observed Test Statistic:** $$t_0 = -0.645$$
 ```{r}
@@ -203,8 +202,6 @@ fisher.test(tab)
 Since the P Value is greater than 0.05, we **retain the Null Hypothesis** and therefore the sample data supports the claim that handedness and needing glasses is independent
 
 
-
-
 ### Is there a difference between students who live at home and whether they had a pet growing up
 
 **1. Hypothesis:** H0: $$p_ij =P_i\times P_j for i = 1,2 and j =1,2$$ H1: At least one equality does not hold.
@@ -236,47 +233,3 @@ chisq.test(y.mat)
 
 **6. Decision:**
 Since the P Value is less than 0.05, we **reject the Null Hypothesis** and can state that having a pet whilst growing up means you are more likey to be living at home.
-
-
-# BACKUP CODE
-
-```{r}
-## Sayano's Original Work for Q4 ##
-x$`How do you like your steak cooked?`[x$`How do you like your steak cooked?`=="Well done"] = "eat red meat"
-x$`How do you like your steak cooked?`[x$`How do you like your steak cooked?`=="Rare"] = "eat red meat"
-x$`How do you like your steak cooked?`[x$`How do you like your steak cooked?`=="Medium"] = "eat red meat"
-x$`How do you like your steak cooked?`[x$`How do you like your steak cooked?`=="Medium-rare"] = "eat red meat"
-x$`How do you like your steak cooked?`[x$`How do you like your steak cooked?`=="Medium-well done"] = "eat red meat"
-red_meat = x %>% dplyr::count(`How do you like your steak cooked?`,)
-eat_red_meat=c(21,18,11,14,2,7,27)
-no_red_meat=c(0,3,1,0,0,1,2)
-(meat <- with(x, table(`How do you like your steak cooked?`, `How many hours a week do you spend exercising?`)))
-c(mean(no_red_meat), mean(eat_red_meat))
-```
-
-```{r}
-## Sayano's Original Work for Q5 ##
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="0"] = "0-1"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="0.5"] = "0-1"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="1"] = "1-2"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="2"] = "1-2"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="2.5"] = "2-3"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="2.75"] = "2-3"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="3"] = "2-3"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="3.5"] = "3-4"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="3.75"] = "3-4"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="4"] = "4-5"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="5"] = "5-9"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="6"] = "5-9"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="7"] = "5-9"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="8"] = "5-9"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="10"] = "10+"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="12"] = "10+"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="14"] = "10+"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="20"] = "10+"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="420"] = "NA"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="09999900"] = "NA"
-x$`How many hours a week do you spend exercising?`[x$`How many hours a week do you spend exercising?`=="9223372036854775808"] = "NA"
-(gender_hand <- with(x, table(`How many hours a week do you spend exercising?`, `How many university clubs are you a member of?`)))
-```
-
