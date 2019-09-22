@@ -55,7 +55,7 @@ x <- x %>% mutate(`How many hours a week do you spend exercising?` = ifelse(`How
 x %>% group_by(Meat) %>% summarize(Mean = mean(`How many hours a week do you spend exercising?`, na.rm=TRUE), SD = sd(`How many hours a week do you spend exercising?`, na.rm=TRUE), n=n())
 
 library("ggplot2")
-ggplot(x, aes(x=Meat, y = `How many hours a week do you spend exercising?`)) + geom_boxplot() + geom_jitter(width=0.15, size=3, colour = "blue") + theme_bw(base_size=32) + labs(x="eat red meat?", y="number of hours of sports played")
+ggplot(x, aes(x=Meat, y = `How many hours a week do you spend exercising?`)) + geom_boxplot() + geom_jitter(width=0.15, size=3, colour = "blue") + theme_bw(base_size=32) + labs(x="eat red meat?", y="hours of sports played")
 ```
 
 
