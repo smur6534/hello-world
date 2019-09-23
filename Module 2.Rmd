@@ -246,7 +246,7 @@ x <- x %>%
                                       "35"="4","36"="5","37"="6","38"="7","39"="8",
                                       "40"="9","41"="10","42"="11")))
 x$`What is your shoe size?` <- as.numeric(as.character(x$`What is your shoe size?`))  # converting back to numeric
-x <- x %>% mutate(`What is your shoe size?` = ifelse(`What is your shoe size?` < 16, `What is your shoe size?`, NA))  # removing values stupidly high
+x <- x %>% mutate(`What is your shoe size?` = ifelse(`What is your shoe size?` < 16, `What is your shoe size?`, NA))  # removing high values
 ```
 
 Finally, a similar issue occurred in the reported heights. After removing obviously incorrect values, some were clearly recorded in metres whilst others were recorded in centimetres. For ease, all have been converted to centimetres.
@@ -272,12 +272,14 @@ reg <- lm(`How tall are you?` ~ `What is your shoe size?`, data=males)
 summary(reg)
 ```
 
-The regression output reveals our observed test statistic to be 5.176. 
+The regression output reveals our observed test statistic to be 5.176.
 
-4. P-Value:
+**4. P-Value:**
+
 $$P(t \geq 5.176) = 0.00000277 < 0.0001 $$
-5. Decision:
-Since the p-value is extremely small, we can reject the null hypothesis at a 1% significance level and conclude shoe size is a statistically significant determinant of male height. Note additionally that the model estimates that for every extra shoe size, height will increase by roughly 2 centimetres. This fit, and the upward trend of the two variables, can be visualised on the scatter plot below.
+**5. Decision:**
+
+Since the p-value is extremely small, we can **reject the null hypothesis** at a 1% significance level and conclude shoe size is a statistically significant determinant of male height. Note additionally that the model estimates that for every extra shoe size, height will increase by roughly 2 centimetres. This fit, and the upward trend of the two variables, can be visualised on the scatter plot below.
 
 ```{r, fig.height=5, fig.width=6}
 plot(males$`What is your shoe size?`,males$`How tall are you?`, main="The Effect of Shoe Size on Male Height",
