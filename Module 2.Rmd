@@ -297,10 +297,11 @@ summary(reg)
 
 The regression output reveals our observed test statistic to be 1.596. 
 
-4. P-Value:
+**4. P-Value:**
 $$P(t \geq 1.596) = 0.119 $$
-5. Decision:
-Since the p-value is quite large, we cannot reject the null hypothesis at even a 10% significance level. Therefore we conclude for females, shoe size is NOT a statistically significant determinant of height. This lack of fit can be visualised on the scatter plot below.
+**5. Decision:**
+
+Since the p-value is quite large, we **cannot reject the null hypothesis** at even a 10% significance level. Therefore we conclude for females, shoe size is NOT a statistically significant determinant of height. This lack of fit can be visualised on the scatter plot below.
 
 ```{r, fig.height=5, fig.width=6}
 plot(females$`What is your shoe size?`,females$`How tall are you?`, main="The Effect of Shoe Size on Female Height",
