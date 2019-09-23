@@ -11,6 +11,7 @@ output: html_document
 library(plyr)
 library(dplyr)
 library(tidyverse)
+library(ggplot2)
 ```
 
 ```{r, message=FALSE}
@@ -53,8 +54,8 @@ x <- x %>% mutate(`How many hours a week do you spend exercising?` = ifelse(`How
 
 x %>% group_by(Meat) %>% summarize(Mean = mean(`How many hours a week do you spend exercising?`, na.rm=TRUE), SD = sd(`How many hours a week do you spend exercising?`, na.rm=TRUE), n=n())
 
-library("ggplot2")
-ggplot(x, aes(x=Meat, y = `How many hours a week do you spend exercising?`)) + geom_boxplot() + geom_jitter(width=0.15, size=3, colour = "blue") + theme_bw(base_size=32) + labs(x="eat red meat?", y="hours of sports played")
+
+ggplot(x, aes(x=Meat, y = `How many hours a week do you spend exercising?`)) + geom_boxplot() + geom_jitter(width=0.15, size=3, colour = "blue") + theme_bw() + labs(x="Eat Red Meat?", y="Hours of Excercise")+ggtitle("Eating Habits and Excercise")+labs(caption='DATA2002 Survey')
 ```
 
 
@@ -107,12 +108,15 @@ x$TripleClub <- ifelse(x$`How many university clubs are you a member of?` >= 3, 
 
 x %>% group_by(TripleClub) %>% summarize(Mean = mean(`How many hours a week do you spend exercising?`, na.rm=TRUE), SD = sd(`How many hours a week do you spend exercising?`, na.rm=TRUE), n=n())
 
-library("ggplot2")
-ggplot(x, aes(x=TripleClub, y = `How many hours a week do you spend exercising?`)) + geom_boxplot() + geom_jitter(width=0.15, size=3, colour = "blue") + theme_bw(base_size=32) + labs(x="join clubs (3 or more)", y="hours of sports played")
+
+ggplot(x, aes(x=TripleClub, y = `How many hours a week do you spend exercising?`)) + geom_boxplot() + geom_jitter(width=0.15, size=3, colour = "blue") + theme_bw() + labs(x="3+ Clubs", y="Hours Excercising")+ggtitle("Excercise and Number of Clubs")+labs(caption='DATA2002 Survey')
+
+
+
 ```
 
 ####Performing a 2 sample T test. 
-This will demonstrate whether the 2 samples: meat eaters and non meaters, if their level of exercise is independent or dependent. 
+This will demonstrate whether the 2 samples: members of 3 or more clubs versus other students, if their level of exercise is independent or dependent. 
 
 **1. Hypothesis:** $$H0: μ_x = μ_y H1: μ_x \text{  does not equal  } μ_y$$
 
@@ -144,15 +148,14 @@ p_val = 2 * (1 - pt(abs(t0), deg_free))
 p_val
 ```
 
-**5. P Value:** $$P(X^2_1 \geq -0.645) = 0.5256$$
+**5. P Value:** $$P(X^2_1 \geq -0.637) = 0.5256$$
 
 **6. Decision:**
 Since the P Value is greater than 0.05, we **retain the Null Hypothesis** and therefore there is no evidence that being apart of a students club impacts the hours students excercise for.
 
 ### Q6 Is there evidence that students who live with their parents study more hours per week than students who don’t live with their parents?
 
-Cleaning the study variable (removed all values above 70, which is more than 10 hours a day - there was one with 60 but I figured probs shouldn't cut it?)
-Then same deal, comparing the means.
+Cleaning the study variable and removing over 70 hours because these were deemed incorrect.
 
 ```{r}
 x <- x %>% mutate(`On average, how many hours per week did you spend on university work last semester?` =
@@ -161,12 +164,12 @@ x <- x %>% mutate(`On average, how many hours per week did you spend on universi
 
 x %>% group_by(`Do you currently live with your parents?`) %>% summarize(Mean = mean(`On average, how many hours per week did you spend on university work last semester?`, na.rm=TRUE), SD = sd(`On average, how many hours per week did you spend on university work last semester?`, na.rm=TRUE), n=n())
 
-library("ggplot2")
-ggplot(x, aes(x=`Do you currently live with your parents?`, y = `On average, how many hours per week did you spend on university work last semester?`)) + geom_boxplot() + geom_jitter(width=0.15, size=3, colour = "blue") + theme_bw(base_size=32) + labs(x="live  with parents", y="hours of study")
+
+ggplot(x, aes(x=`Do you currently live with your parents?`, y = `On average, how many hours per week did you spend on university work last semester?`)) + geom_boxplot() + geom_jitter(width=0.15, size=3, colour = "blue") + theme_bw() + labs(x="live  with parents", y="hours of study")
 ```
 
 ####Performing a 2 sample T test. 
-This will demonstrate whether the 2 samples: meat eaters and non meaters, if their level of exercise is independent or dependent. 
+
 
 **1. Hypothesis:** $$H0: μ_x = μ_y H1: μ_x \text{  does not equal  } μ_y$$
 
@@ -191,21 +194,21 @@ t0 = (mY - mN)/(sP * sqrt(1/nY + 1/nN))
 t0
 ```
 
-**4. Observed Test Statistic:** $$t_0 = -0.0.113$$
+**4. Observed Test Statistic:** $$t_0 = -0.113$$
 ```{r}
 deg_free = nY+nN-2
 p_val = 2 * (1 - pt(abs(t0), deg_free))
 p_val
 ```
 
-**5. P Value:** $$P(X^2_1 \geq -0.645) = 0.910$$
+**5. P Value:** $$P(X^2_1 \geq -0.113) = 0.910$$
 
 **6. Decision:**
 Since the P Value is greater than 0.05, we **retain the Null Hypothesis** and therefore there is no evidence that living with parents impacts the hours students excercise for.
 
 # 4. Further Data Analysis
 
-Our 3 additional questions.
+3 additional questions.
 
 ### Shoe Size vs Height
 
