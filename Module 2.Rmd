@@ -5,7 +5,9 @@ date: "Semester 2 2019"
 output: html_document
 ---
 
-#                             Data Import
+$~$
+
+# 1. Data Import
 
 ```{r, echo=FALSE, message=FALSE}
 library(plyr)
@@ -16,34 +18,36 @@ library(ggplot2)
 
 ```{r, message=FALSE}
 options(scipen=999) # stops the scientific notation
-options(warn=-1) # stops the annoying warnings
+options(warn=-1)
 x = readr::read_csv("data.csv", na = c("NA",""," ", "n/a"))
 ```
 
-# Data Exploration
+$~$
+$~$
+
+# 2. Data Exploration
 
 The dataset used comes from a class survey of the students in DATA2002. There were 110 respondents who each answered 22 questions about themselves. A timestamp variable of when respondents completed the survey is also included.
 
-
-####  Data Limitations
-
-##### Q1. Is this a random sample of DATA2002 students?
-No, the data is not a random sample of students from DATA2002 because, whilst only a sample or subset of students completed the survey, means that only a 'type of student' is reflected in the sample, possibly high achieving or highly motivated students who had the time and made the active decision to complete the survey. As such, students who generally participate less in their courses are not reflected in the sample data and therefore the data is not a random sample. 
+### 2.1 Randomisation of Sample
+No, this data is not a random sample of students from DATA2002 because, whilst only a sample or subset of students completed the survey, means that only a 'type of student' is reflected in the sample. Given the survey was on an 'opt-in' basis, it may reflect only more high achieving or higher motivated students who had the time and made the active decision to complete the survey. As such, students who generally participate less in their courses may not be accurately reflected in the sample data, and thus the data is not a random sample.
 
 
-##### Q2. What are the potential biases in this data generation?
-There could be some measurement biases in the data such as the same questions may be interpreted differently in the students responses. Furthermore, knowing that this survey was going to be used for an assessment, that there is some level of response bias, with students answering in a specific way or the way they think the researcher would like them to answer instead of their true response. 
+### 2.2 Potential Biases
+**Measurement biases** exist in the data, as some questions are ambiguously worded and may be interpreted differently in the students responses. Furthermore, knowing that this survey was going to be used for an assessment, there may be some level of **response bias**, with students answering in a specific way or the way they think the researcher would like them to answer instead of their true response. Additionally, as reflected above, **selection bias** is prevalent, as the students were not randomly selected. 
 
 
-##### Q3. Which variables are most likely to be subjected to this bias?
-The more open ended questions are more likely to be subjected to bias. For example, the questions asking students the hours they spend on university work last semester could easily be subject to measurement bias with students differently interpreting what constitutes university work, as well as be subject to response bias with students over or under exaggerating the hours they work to appeal to the lecturer.
+### 2.3 Variables Most Susceptible to Bias
+Generally speaking, it is the more open ended questions that are more likely to be subjected to bias. For example, the questions asking students the hours they spend on university work last semester could easily be subject to measurement bias with students differently interpreting what constitutes university work. Questions such as these may also be subject to response bias, where students over or under exaggerate the hours they work to appeal to the lecturer.
 
+$~$
+$~$
 
-Data Analysis
+# 3. Data Analysis
 
-### Q4. Is there any evidence to suggest that there’s a difference in the amount of exercise done by people who eat red meat compared to people who don’t eat red meat?
+### 3.1 Effect of Red Meat Consumption on Exercise
 
-Cleaning data: Creating a separate varaible 'Meat' based off whether respondents eat meat to then compare the counts. Then cleaning the excercise variable by removing all values greater than 24 and converting the type of data to numeric.
+First cleaning the data, a separate variable 'Meat' was created based off whether respondents eat meat to then compare the counts. Additionally, the exercise variable was cleaned by removing all values greater than 24 and converting the type of data to numeric.
 
 ```{r}
 yes_answers = c("Well done","Rare","Medium","Medium-rare","Medium-well done")
@@ -51,15 +55,21 @@ x$Meat = ifelse(x$`How do you like your steak cooked?` %in% yes_answers, "Yes",
                 ifelse(x$`How do you like your steak cooked?` == "I don't eat red meat", "No", NA))
 x$`How many hours a week do you spend exercising?` <- as.numeric(as.character(x$`How many hours a week do you spend exercising?`))
 x <- x %>% mutate(`How many hours a week do you spend exercising?` = ifelse(`How many hours a week do you spend exercising?` < 24, `How many hours a week do you spend exercising?`, NA))
+```
 
+The table below summarises a glance of the differences between means, standard deviations and counts of the groups (those who eat red meat and those who do not). It is worth noting that our sample for those who do not eat meat is very small, and consequently all results here must be prefaced with the disclaimer that our sample size is very small. 
+
+```{r}
 x %>% group_by(Meat) %>% summarize(Mean = mean(`How many hours a week do you spend exercising?`, na.rm=TRUE), SD = sd(`How many hours a week do you spend exercising?`, na.rm=TRUE), n=n())
+```
 
+The differences in these means across the groups canbe visualised by the plot below.
 
+```{r}
 ggplot(x, aes(x=Meat, y = `How many hours a week do you spend exercising?`)) + geom_boxplot() + geom_jitter(width=0.15, size=3, colour = "blue") + theme_bw() + labs(x="Eat Red Meat?", y="Hours of Excercise")+ggtitle("Eating Habits and Excercise")+labs(caption='DATA2002 Survey')
 ```
 
-
-####Performing a 2 sample T test. 
+##### Performing a 2 sample T test. 
 This will demonstrate whether the 2 samples: meat eaters and non meaters, if their level of exercise is independent or dependent. 
 
 **1. Hypothesis:** $$H0: μ_x = μ_y H1: μ_x \text{  does not equal  } μ_y$$
@@ -94,28 +104,24 @@ p_val
 
 **5. P Value:** $$P(X^2_1 \geq -0.645) = 0.5203$$
 
-
 **6. Decision:**
 Since the P Value is greater than 0.05, we **retain the Null Hypothesis** and therefore there is no evidence that eating meat impacts the hours students excercise for.
 
-### Q5 Is there any evidence that the weekly exercise time of students who participate in more than 3 univeristy clubs is different to those who don’t?
+$~$
 
-Creating a separate variable "TripleClub" for whether people are part of 3 or more clubs or not.
-Comparing means of those part of 3 or more groups with those that aren't. Again, confidence intervals or something?
+### 3.2 Effect of University Club Participation on Exercise
+
+Again, a separate variable was created ("TripleClub") for whether people are part of 3 or more clubs or not. This allows us to similarly compare the summary statistics of the two groups.
 
 ```{r}
 x$TripleClub <- ifelse(x$`How many university clubs are you a member of?` >= 3, "Yes", "No")
 
 x %>% group_by(TripleClub) %>% summarize(Mean = mean(`How many hours a week do you spend exercising?`, na.rm=TRUE), SD = sd(`How many hours a week do you spend exercising?`, na.rm=TRUE), n=n())
 
-
 ggplot(x, aes(x=TripleClub, y = `How many hours a week do you spend exercising?`)) + geom_boxplot() + geom_jitter(width=0.15, size=3, colour = "blue") + theme_bw() + labs(x="3+ Clubs", y="Hours Excercising")+ggtitle("Excercise and Number of Clubs")+labs(caption='DATA2002 Survey')
-
-
-
 ```
 
-####Performing a 2 sample T test. 
+##### Performing a 2 sample T test. 
 This will demonstrate whether the 2 samples: members of 3 or more clubs versus other students, if their level of exercise is independent or dependent. 
 
 **1. Hypothesis:** $$H0: μ_x = μ_y H1: μ_x \text{  does not equal  } μ_y$$
@@ -153,9 +159,11 @@ p_val
 **6. Decision:**
 Since the P Value is greater than 0.05, we **retain the Null Hypothesis** and therefore there is no evidence that being apart of a students club impacts the hours students excercise for.
 
-### Q6 Is there evidence that students who live with their parents study more hours per week than students who don’t live with their parents?
+$~$
 
-Cleaning the study variable and removing over 70 hours because these were deemed incorrect.
+### 3.3 Effect of Living with Parents on Study Hours
+
+To clean the study variable, it was reasoned that any reported value above 70 is infeasible, as this would require 10 hours a day, 7 days a week. The highest value below this cutoff was around 60, and everything above it was well into the hundreds or above, which we deem to be incorrectly reported values. Again, comparing summary statistics and creating a visualisation:
 
 ```{r}
 x <- x %>% mutate(`On average, how many hours per week did you spend on university work last semester?` =
@@ -168,8 +176,7 @@ x %>% group_by(`Do you currently live with your parents?`) %>% summarize(Mean = 
 ggplot(x, aes(x=`Do you currently live with your parents?`, y = `On average, how many hours per week did you spend on university work last semester?`)) + geom_boxplot() + geom_jitter(width=0.15, size=3, colour = "blue") + theme_bw() + labs(x="live  with parents", y="hours of study")
 ```
 
-####Performing a 2 sample T test. 
-
+##### Performing a 2 sample T test. 
 
 **1. Hypothesis:** $$H0: μ_x = μ_y H1: μ_x \text{  does not equal  } μ_y$$
 
@@ -206,23 +213,24 @@ p_val
 **6. Decision:**
 Since the P Value is greater than 0.05, we **retain the Null Hypothesis** and therefore there is no evidence that living with parents impacts the hours students excercise for.
 
+$~$
+$~$
+
 # 4. Further Data Analysis
 
-3 additional questions.
+### 4.1 Effect of Shoe Size on Height
 
-### Shoe Size vs Height
-
-Re-coding the gender column:
+For this question, a number of variables were refactored for simplicity or practicality.
+Firstly, gender was refactored to be either male (M), female (F), or null.
 
 ```{r}
 x$Gender <- toupper(mapvalues(x$Gender %>% tolower,
                               from=c("female", "male", "man"),
                               to=c("f", "m", "m")))
 x <- x %>% mutate(`Gender` = fct_lump(`Gender`, n = 2, other_level = NA))
-x
 ```
 
-Re-coding the shoe sizes (using https://www.finder.com.au/shoe-size-conversion-guide and only converting those clearly EU to what it says the equivalent AUS size is, likely slight discrepancies with the whole UK/US thing but nothing we can do about that)
+Secondly, the shoe size variable was recoded using an online conversion guide (see Bibliography). This was because some shoe sizes were presented in EU sizing, whilst others in AUS/UK/US (these latter three have slight discrepancies but are generally within a size or two). This refactorisation also required segregating by gender.
 
 ```{r}
 x <- x %>%
@@ -241,15 +249,74 @@ x$`What is your shoe size?` <- as.numeric(as.character(x$`What is your shoe size
 x <- x %>% mutate(`What is your shoe size?` = ifelse(`What is your shoe size?` < 16, `What is your shoe size?`, NA))  # removing values stupidly high
 ```
 
-### Do more right handed people wear glasses?
+Finally, a similar issue occurred in the reported heights. After removing obviously incorrect values, some were clearly recorded in metres whilst others were recorded in centimetres. For ease, all have been converted to centimetres.
 
-####Performing  Fisher's Exact Test
+```{r}
+x <- x %>% mutate(`How tall are you?` = ifelse(`How tall are you?` < 210, ifelse(`How tall are you?` > 3, `How tall are you?`, `How tall are you?`*100), NA)) 
+```
+
+Due to differences between genders, it is best to approach testing this causality with regards to only one gender at a time. In either case, given these are both numerical variables, we frame our test as whether a linear regression between the two yields a statistically significant slope coefficient. Therefore assuming a regression model of $Y_i = \beta_0 + \beta_1X_i + e_i$, for either gender, our hypotheses are as follows:
+
+**1. Hypotheses:**
+$$H_0: \beta_1 = 0 \quad H_1: \beta_1 ≠ 0$$
+**2. Assumptions**
+Conducting this test requires least squared regression assumptions. Since they are beyond the scope of this course (currently), they will not be scrutinised with great vigour, but most can be argued to hold intuitively or tested via residual plots.
+
+**3. Test Statistic:**
+$$T = \frac{\hat{\beta_1}-0}{SE(\hat{\beta_1})} \text{ under } H_0, T \sim \text{ student-}t \text{ distribution} $$
+Starting with conducting a regression for the males:
+
+```{r}
+males <- x %>% filter(x$`Gender` == "M")
+reg <- lm(`How tall are you?` ~ `What is your shoe size?`, data=males)
+summary(reg)
+```
+
+The regression output reveals our observed test statistic to be 5.176. 
+
+4. P-Value:
+$$P(t \geq 5.176) = 0.00000277 < 0.0001 $$
+5. Decision:
+Since the p-value is extremely small, we can reject the null hypothesis at a 1% significance level and conclude shoe size is a statistically significant determinant of male height. Note additionally that the model estimates that for every extra shoe size, height will increase by roughly 2 centimetres. This fit, and the upward trend of the two variables, can be visualised on the scatter plot below.
+
+```{r, fig.height=5, fig.width=6}
+plot(males$`What is your shoe size?`,males$`How tall are you?`, main="The Effect of Shoe Size on Male Height",
+     xlab="Shoe Size", ylab="Height (cm)")
+abline(a=160.3152,b=1.9029, col="red")
+```
+
+Now testing if similar correlation can be found for females:
+
+```{r}
+females <- x %>% filter(x$`Gender` == "F")
+reg <- lm(`How tall are you?` ~ `What is your shoe size?`, data=females)
+summary(reg)
+```
+
+The regression output reveals our observed test statistic to be 1.596. 
+
+4. P-Value:
+$$P(t \geq 1.596) = 0.119 $$
+5. Decision:
+Since the p-value is quite large, we cannot reject the null hypothesis at even a 10% significance level. Therefore we conclude for females, shoe size is NOT a statistically significant determinant of height. This lack of fit can be visualised on the scatter plot below.
+
+```{r, fig.height=5, fig.width=6}
+plot(females$`What is your shoe size?`,females$`How tall are you?`, main="The Effect of Shoe Size on Female Height",
+     xlab="Shoe Size", ylab="Height (cm)")
+abline(a=154.1944,b=1.3593, col="red")
+```
+
+$~$
+
+### 4.2 Effect of Handedness on Wearing Glasses
+
+##### Performing  Fisher's Exact Test
+
 This will demonstrate whether 'handedness' and needing glasses are independent or not.
 
 **1. Hypothesis:** $$H_0: θ = 1 $$ $$H_1 θ > 1$$
 
 **2. Assumptions:** As this is an 'exact' test we do not have to assume that the categories have to be greater than 5
-
 
 ```{r}
 handed=recode(x$`What is your dominant hand?`, `Left handed` ="Left", `Right handed`="Right",.default = NA_character_)
@@ -257,8 +324,8 @@ handed=recode(x$`What is your dominant hand?`, `Left handed` ="Left", `Right han
 tab=table(handed,x$`Do you wear glasses or contacts?`)
 tab
 ```
-**3. Test Statistic:** ??
 
+**3. Test Statistic:** ??
 
 ```{r}
 fisher.test(tab)
@@ -267,12 +334,12 @@ fisher.test(tab)
 
 **5. P Value:** 0.4901
 
-
 **6. Decision:**
-Since the P Value is greater than 0.05, we **retain the Null Hypothesis** and therefore the sample data supports the claim that handedness and needing glasses is independent
+Since the P Value is greater than 0.05, we **retain the null hypothesis** and therefore the sample data supports the claim that handedness and needing glasses is independent.
 
+$~$
 
-### Is there a difference between students who live at home and whether they had a pet growing up
+### 4.3 Effect of Living with Parents on Pet Ownership
 
 **1. Hypothesis:** H0: $$p_ij =P_i\times P_j for i = 1,2 and j =1,2$$ H1: At least one equality does not hold.
 
@@ -280,10 +347,10 @@ Since the P Value is greater than 0.05, we **retain the Null Hypothesis** and th
 ```{r}
 table(x$`Do you currently live with your parents?`,x$`Did you have a pet growing up?`)
 ```
+
 **3. Test Statistic:** $$T = \sum_{i=1}^{2}\sum_{j=1}^{2} \frac{(y_i\times y_j/n)^2}{y_i\times y_j/n}. Under H_0   T ∼ χ_1^2$$
 
-
-#### Chi Squared Test of Independence
+##### Chi Squared Test of Independence
 ```{r  warning=FALSE}
 y=c(35,13,25,36)
 n=sum(y)
@@ -297,7 +364,24 @@ chisq.test(y.mat)
 
 **5. P Value:** $$P(X^2_1 \geq 9.87167) = 0.001729$$
 
-
 **6. Decision:**
 Since the P Value is less than 0.05, we **reject the Null Hypothesis** and can state that having a pet whilst growing up means you are more likey to be living at home.
 
+$~$
+$~$
+
+# 5. Bibliography
+
+##### In-Text References
+Finder Australia, 2019, *The ultimate international shoe size conversion guide*, viewed 19 September 2019, https://www.finder.com.au/shoe-size-conversion-guide.
+
+##### Coding Packages
+Gregory Demin (2019). expss: Tables, Labels and Some Useful Functions for Spreadsheets. R package version 0.9.1. URL: http://CRAN.r-project.org/package=expss.
+
+Hadley Wickham (2017). tidyverse: Easily Install and Load the ‘Tidyverse’. R package version 1.2.1. URL: https://CRAN.R-project.org/package=tidyverse.
+
+Hadley Wickham (2019). ggplot2: Elegant Graphics for Data Analysis. R package version 3.2.1. URL: http://CRAN.r-project.org/package=ggplot2.
+
+Hadley Wickham, Romain François, Lionel Henry and Kirill Müller (2019). dplyr: A Grammar of Data Manipulation. R package version 0.8.3. URL: https://CRAN.R-project.org/package=dplyr.
+
+R Core Team (2019). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL: https://www.R-project.org/.
