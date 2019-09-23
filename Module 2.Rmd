@@ -51,7 +51,6 @@ x$Meat = ifelse(x$`How do you like your steak cooked?` %in% yes_answers, "Yes",
 x$`How many hours a week do you spend exercising?` <- as.numeric(as.character(x$`How many hours a week do you spend exercising?`))
 x <- x %>% mutate(`How many hours a week do you spend exercising?` = ifelse(`How many hours a week do you spend exercising?` < 24, `How many hours a week do you spend exercising?`, NA))
 
-#x %>% group_by(Meat) %>% summarize(mean_size=mean(`How many hours a week do you spend exercising?`, na.rm=TRUE))
 x %>% group_by(Meat) %>% summarize(Mean = mean(`How many hours a week do you spend exercising?`, na.rm=TRUE), SD = sd(`How many hours a week do you spend exercising?`, na.rm=TRUE), n=n())
 
 library("ggplot2")
@@ -67,9 +66,6 @@ This will demonstrate whether the 2 samples: meat eaters and non meaters, if the
 **2. Assumptions:** $$X_i,..... X_n \text{  are independent and identically distributed, }$$
 $$Y_i,..... Y_n \text{  are independent and identically distributed.}$$
 $$X_i's \text{  independent of } Y_i's$$
-```{r}
-x %>% group_by(Meat) %>% summarize(Mean=mean(`How many hours a week do you spend exercising?`, na.rm=TRUE),SD=sd(`How many hours a week do you spend exercising?`, na.rm=TRUE), n=n())
-```
 
 **3. Test Statistic:** $$T = \frac{X-Y}{(S_p  \sqrt(1/n_1+1/n_2))}$$ where 
 $$S^2_p= \frac{(n_x-1)S^2_x + (n_y-1)S^2_y}{n_x+n_y-2}   $$ Under $$ H_0, T ~ t_n_x+T_n_y$$
@@ -101,9 +97,6 @@ p_val
 **6. Decision:**
 Since the P Value is greater than 0.05, we **retain the Null Hypothesis** and therefore there is no evidence that eating meat impacts the hours students excercise for.
 
-
-
-
 ### Q5 Is there any evidence that the weekly exercise time of students who participate in more than 3 univeristy clubs is different to those who don’t?
 
 Creating a separate variable "TripleClub" for whether people are part of 3 or more clubs or not.
@@ -111,12 +104,11 @@ Comparing means of those part of 3 or more groups with those that aren't. Again,
 
 ```{r}
 x$TripleClub <- ifelse(x$`How many university clubs are you a member of?` >= 3, "Yes", "No")
-#x %>% group_by(TripleClub) %>% summarize(mean_size=mean(`How many hours a week do you spend exercising?`, na.rm=TRUE))
 
 x %>% group_by(TripleClub) %>% summarize(Mean = mean(`How many hours a week do you spend exercising?`, na.rm=TRUE), SD = sd(`How many hours a week do you spend exercising?`, na.rm=TRUE), n=n())
 
 library("ggplot2")
-ggplot(x, aes(x=TripleClub, y = `How many hours a week do you spend exercising?`)) + geom_boxplot() + geom_jitter(width=0.15, size=3, colour = "blue") + theme_bw(base_size=32) + labs(x="eat red meat?", y="hours of sports played")
+ggplot(x, aes(x=TripleClub, y = `How many hours a week do you spend exercising?`)) + geom_boxplot() + geom_jitter(width=0.15, size=3, colour = "blue") + theme_bw(base_size=32) + labs(x="join clubs (3 or more)", y="hours of sports played")
 ```
 
 ####Performing a 2 sample T test. 
@@ -127,9 +119,6 @@ This will demonstrate whether the 2 samples: meat eaters and non meaters, if the
 **2. Assumptions:** $$X_i,..... X_n \text{  are independent and identically distributed, }$$
 $$Y_i,..... Y_n \text{  are independent and identically distributed.}$$
 $$X_i's \text{  independent of } Y_i's$$
-```{r}
-x %>% group_by(TripleClub) %>% summarize(Mean=mean(`How many hours a week do you spend exercising?`, na.rm=TRUE),SD=sd(`How many hours a week do you spend exercising?`, na.rm=TRUE), n=n())
-```
 
 **3. Test Statistic:** $$T = \frac{X-Y}{(S_p  \sqrt(1/n_1+1/n_2))}$$ where 
 $$S^2_p= \frac{(n_x-1)S^2_x + (n_y-1)S^2_y}{n_x+n_y-2}   $$ Under $$ H_0, T ~ t_n_x+T_n_y$$
@@ -169,14 +158,54 @@ Then same deal, comparing the means.
 x <- x %>% mutate(`On average, how many hours per week did you spend on university work last semester?` =
                     ifelse(`On average, how many hours per week did you spend on university work last semester?` < 70,
                            `On average, how many hours per week did you spend on university work last semester?`, NA))
-x %>% group_by(`Do you currently live with your parents?`) %>% summarize(mean_size=mean(`On average, how many hours per week did you spend on university work last semester?`, na.rm=TRUE))
+
+x %>% group_by(`Do you currently live with your parents?`) %>% summarize(Mean = mean(`On average, how many hours per week did you spend on university work last semester?`, na.rm=TRUE), SD = sd(`On average, how many hours per week did you spend on university work last semester?`, na.rm=TRUE), n=n())
+
+library("ggplot2")
+ggplot(x, aes(x=`Do you currently live with your parents?`, y = `On average, how many hours per week did you spend on university work last semester?`)) + geom_boxplot() + geom_jitter(width=0.15, size=3, colour = "blue") + theme_bw(base_size=32) + labs(x="live  with parents", y="hours of study")
 ```
 
+####Performing a 2 sample T test. 
+This will demonstrate whether the 2 samples: meat eaters and non meaters, if their level of exercise is independent or dependent. 
+
+**1. Hypothesis:** $$H0: μ_x = μ_y H1: μ_x \text{  does not equal  } μ_y$$
+
+**2. Assumptions:** $$X_i,..... X_n \text{  are independent and identically distributed, }$$
+$$Y_i,..... Y_n \text{  are independent and identically distributed.}$$
+$$X_i's \text{  independent of } Y_i's$$
+
+**3. Test Statistic:** $$T = \frac{X-Y}{(S_p  \sqrt(1/n_1+1/n_2))}$$ where 
+$$S^2_p= \frac{(n_x-1)S^2_x + (n_y-1)S^2_y}{n_x+n_y-2}   $$ Under $$ H_0, T ~ t_n_x+T_n_y$$
+
+```{r}
+nY=49
+nN=60
+sY=14.06326
+sN=14.36131
+mY=26.91489
+mN=27.22414
+sP = sqrt(((nY - 1) * sY^2 + (nN - 1) * sN^2)/
+(nY + nN - 2))
+
+t0 = (mY - mN)/(sP * sqrt(1/nY + 1/nN))
+t0
+```
+
+**4. Observed Test Statistic:** $$t_0 = -0.0.113$$
+```{r}
+deg_free = nY+nN-2
+p_val = 2 * (1 - pt(abs(t0), deg_free))
+p_val
+```
+
+**5. P Value:** $$P(X^2_1 \geq -0.645) = 0.910$$
+
+**6. Decision:**
+Since the P Value is greater than 0.05, we **retain the Null Hypothesis** and therefore there is no evidence that living with parents impacts the hours students excercise for.
 
 # 4. Further Data Analysis
 
 Our 3 additional questions.
-
 
 ### Shoe Size vs Height
 
@@ -209,10 +238,7 @@ x$`What is your shoe size?` <- as.numeric(as.character(x$`What is your shoe size
 x <- x %>% mutate(`What is your shoe size?` = ifelse(`What is your shoe size?` < 16, `What is your shoe size?`, NA))  # removing values stupidly high
 ```
 
-
 ### Do more right handed people wear glasses?
-
-
 
 ####Performing  Fisher's Exact Test
 This will demonstrate whether 'handedness' and needing glasses are independent or not.
@@ -223,10 +249,7 @@ This will demonstrate whether 'handedness' and needing glasses are independent o
 
 
 ```{r}
-
-
 handed=recode(x$`What is your dominant hand?`, `Left handed` ="Left", `Right handed`="Right",.default = NA_character_)
-
 
 tab=table(handed,x$`Do you wear glasses or contacts?`)
 tab
@@ -235,7 +258,6 @@ tab
 
 
 ```{r}
-
 fisher.test(tab)
 ```
 **4. Observed Test Statistic:** ??
@@ -253,8 +275,6 @@ Since the P Value is greater than 0.05, we **retain the Null Hypothesis** and th
 
 **2. Assumptions:** $$e_ij = y_i\times y_j/n ≥ 5$$
 ```{r}
-
-
 table(x$`Do you currently live with your parents?`,x$`Did you have a pet growing up?`)
 ```
 **3. Test Statistic:** $$T = \sum_{i=1}^{2}\sum_{j=1}^{2} \frac{(y_i\times y_j/n)^2}{y_i\times y_j/n}. Under H_0   T ∼ χ_1^2$$
@@ -268,7 +288,6 @@ c=2
 r=2
 y.mat = matrix(y, nrow = r, ncol = c)
 chisq.test(y.mat)
-
 ```
 
 **4. Observed Test Statistic:** $$t_0 = 9.87167$$
@@ -278,3 +297,4 @@ chisq.test(y.mat)
 
 **6. Decision:**
 Since the P Value is less than 0.05, we **reject the Null Hypothesis** and can state that having a pet whilst growing up means you are more likey to be living at home.
+
