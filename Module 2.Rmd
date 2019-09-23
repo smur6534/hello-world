@@ -325,16 +325,16 @@ tab=table(handed,x$`Do you wear glasses or contacts?`)
 tab
 ```
 
-**3. Test Statistic:** ??
+**3.Hypergeometric Distribution** $$P(X \geqslant 40) =  P(X =40,41,42,43,44,45)$$
 
 ```{r}
 fisher.test(tab)
+
 ```
-**4. Observed Test Statistic:** ??
 
-**5. P Value:** 0.4901
+**4. P Value:** 0.4901
 
-**6. Decision:**
+**5. Decision:**
 Since the P Value is greater than 0.05, we **retain the null hypothesis** and therefore the sample data supports the claim that handedness and needing glasses is independent.
 
 $~$
